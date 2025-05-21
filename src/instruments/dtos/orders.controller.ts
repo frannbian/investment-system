@@ -34,9 +34,9 @@ export class OrdersController {
   @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateOrderDto: UpdateOrderDto,
+    @Body() UpdateOrderDto: UpdateOrderDto,
   ) {
-    return this.ordersService.update(id, updateOrderDto);
+    return this.ordersService.update(id, UpdateOrderDto);
   }
 
   @Delete(':id')

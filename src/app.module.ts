@@ -6,25 +6,32 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { InstrumentsModule } from './instruments/instruments.module';
 import { OrdersModule } from './orders/orders.module';
-import { MarketdataModule } from './marketdata/marketdata.module';
+import { MarketDataModule } from './market-data/market-data.module';
+import { User } from './users/user.entity';
+import { Order } from './orders/order.entity';
+import { MarketData } from './market-data/market-data.entity';
+import { Instrument } from './instruments/instrument.entity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 3306,
-      username: 'cocos_root',
-      password: 'root.!*',
-      database: 'cocos_challange',
-      entities: [],
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT ?? '5432'),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      entities: [User, Order, MarketData, Instrument],
       synchronize: true,
     }),
     UsersModule,
     InstrumentsModule,
     OrdersModule,
-    MarketdataModule,
+    MarketDataModule,
   ],
   controllers: [AppController],
   providers: [AppService],

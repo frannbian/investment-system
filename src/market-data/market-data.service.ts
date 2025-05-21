@@ -15,10 +15,12 @@ export class MarketDataService {
   }
 
   async findOne(id: number) {
-    const order = await this.marketDataRepository.findOne({ where: { id } });
-    if (!order) {
+    const marketData = await this.marketDataRepository.findOne({
+      where: { id },
+    });
+    if (!marketData) {
       throw new NotFoundException('market data not found');
     }
-    return order;
+    return marketData;
   }
 }
