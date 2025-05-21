@@ -13,7 +13,7 @@ export class MarketData {
   id: number;
 
   @ManyToOne(() => Instrument)
-  @JoinColumn({ name: 'instrumentId' })
+  @JoinColumn({ name: 'instrument_id' })
   instrument: Instrument;
 
   @Column('decimal', { precision: 10, scale: 2 })
@@ -29,8 +29,8 @@ export class MarketData {
   close: number;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  previousClose: number;
+  previous_close: number;
 
-  @Column('timestamp')
-  datetime: Date;
+  @Column('date')
+  date: Date;
 }

@@ -5,12 +5,12 @@ export class Instrument {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: 10 })
   ticker: string;
 
-  @Column()
+  @Column({ length: 255 })
   name: string;
 
-  @Column()
+  @Column({ length: 10 })
   type: string;
 }

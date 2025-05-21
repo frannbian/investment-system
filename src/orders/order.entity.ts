@@ -14,26 +14,26 @@ export class Order {
   id: number;
 
   @ManyToOne(() => Instrument)
-  @JoinColumn({ name: 'instrumentId' })
+  @JoinColumn({ name: 'instrument_id' })
   instrument: Instrument;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @Column()
-  side: string;
-
-  @Column('decimal', { precision: 10, scale: 2 })
   size: number;
 
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
-  @Column()
+  @Column({ length: 10 })
   type: string;
 
-  @Column()
+  @Column({ length: 10 })
+  side: string;
+
+  @Column({ length: 10 })
   status: string;
 
   @Column()
