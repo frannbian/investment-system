@@ -8,6 +8,6 @@ export class User {
   @Column({ length: 255 })
   email: string;
 
-  @Column({ name: 'account_number', length: 20 })
+  @Column({ name: 'account_number', unique: true, length: 20 })
   accountNumber: string;
 }
