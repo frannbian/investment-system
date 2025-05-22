@@ -1,4 +1,5 @@
-import { Expose, Transform } from 'class-transformer';
+import { Expose } from 'class-transformer';
+import { Instrument } from 'src/instruments/instrument.entity';
 
 export class MarketDataDto {
   @Expose()
@@ -20,9 +21,8 @@ export class MarketDataDto {
   previousClose: number;
 
   @Expose()
-  datetime: Date;
+  date: Date;
 
-  @Transform(({ obj }) => obj.instrument.id)
   @Expose()
-  instrumentId: number;
+  instrument: Instrument;
 }

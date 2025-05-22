@@ -28,8 +28,8 @@ export class MarketData {
   @Column('decimal', { precision: 10, scale: 2 })
   close: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  previous_close: number;
+  @Column('decimal', { precision: 10, scale: 2, name: 'previous_close' })
+  previousClose: number;
 
   @Column('date')
   date: Date;
