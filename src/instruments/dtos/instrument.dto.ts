@@ -1,4 +1,5 @@
 import { Expose } from 'class-transformer';
+import { InstrumentType } from '../instrument.entity';
 
 export class InstrumentDto {
   @Expose()
@@ -11,5 +12,5 @@ export class InstrumentDto {
   name: string;
 
   @Expose()
-  type: string;
+  type: InstrumentType;
 }

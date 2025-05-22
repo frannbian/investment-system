@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateInstrumentDto } from './dtos/create-instrument.dto';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { Instrument } from './instrument.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PaginatedInstrumentsDto } from './dtos/paginated-instruments.dto';
+import { InstrumentDto } from './dtos/instrument.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class InstrumentsService {
@@ -11,11 +14,28 @@ export class InstrumentsService {
     private readonly instrumentRepository: Repository<Instrument>,
   ) {}
 
-  async findAll() {
-    return await this.instrumentRepository.find();
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    query: string = '',
+  ): Promise<PaginatedInstrumentsDto> {
+    const filter = query
+      ? [{ ticker: ILike(`%${query}%`) }, { name: ILike(`%${query}%`) }]
+      : [];
+    const [data, total] = await this.instrumentRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      where: filter,
+    });
+    return {
+      data: plainToInstance(InstrumentDto, data, {
+        excludeExtraneousValues: true,
+      }),
+      total,
+    };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Instrument> {
     const instrument = await this.instrumentRepository.findOne({
       where: { id },
     });
@@ -25,12 +45,12 @@ export class InstrumentsService {
     return instrument;
   }
 
-  async create(createInstrumentDto: CreateInstrumentDto) {
-    const newUser = this.instrumentRepository.create(createInstrumentDto);
-    return await this.instrumentRepository.save(newUser);
+  async create(createInstrumentDto: CreateInstrumentDto): Promise<Instrument> {
+    const newInstrument = this.instrumentRepository.create(createInstrumentDto);
+    return await this.instrumentRepository.save(newInstrument);
   }
 
-  async update(id: number, attrs: Partial<Instrument>) {
+  async update(id: number, attrs: Partial<Instrument>): Promise<Instrument> {
     const instrument = await this.findOne(id);
     if (!instrument) {
       throw new NotFoundException('instrument not found');
@@ -39,7 +59,7 @@ export class InstrumentsService {
     return this.instrumentRepository.save(instrument);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<Instrument> {
     const instrument = await this.instrumentRepository.findOne({
       where: { id },
     });

@@ -8,7 +8,6 @@ import {
   Body,
   ParseIntPipe,
   Query,
-  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user.dto';

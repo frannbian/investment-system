@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import { InstrumentType } from '../instrument.entity';
 
 export class UpdateInstrumentDto {
   @IsString()
@@ -11,5 +12,8 @@ export class UpdateInstrumentDto {
 
   @IsString()
   @IsNotEmpty()
-  type: string;
+  @IsEnum(InstrumentType, {
+    message: 'side must be one of the following values: ACCIONES, MONEDA',
+  })
+  type: InstrumentType;
 }

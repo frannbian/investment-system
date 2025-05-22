@@ -1,8 +1,11 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import { Instrument, InstrumentType } from '../instrument.entity';
+import { IsUnique } from 'src/shared/decorators/is-unique.decorator';
 
 export class CreateInstrumentDto {
   @IsString()
   @IsNotEmpty()
+  @IsUnique(Instrument, 'ticker', { message: 'Ticker already exists' })
   ticker: string;
 
   @IsString()
@@ -11,5 +14,8 @@ export class CreateInstrumentDto {
 
   @IsString()
   @IsNotEmpty()
-  type: string;
+  @IsEnum(InstrumentType, {
+    message: 'side must be one of the following values: ACCIONES, MONEDA',
+  })
+  type: InstrumentType;
 }

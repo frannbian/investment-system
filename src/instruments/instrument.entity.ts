@@ -1,5 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
+export enum InstrumentType {
+  ACCIONES = 'ACCIONES',
+  MONEDA = 'MONEDA',
+}
+
 @Entity('instruments')
 export class Instrument {
   @PrimaryGeneratedColumn()
@@ -11,6 +16,6 @@ export class Instrument {
   @Column({ length: 255 })
   name: string;
 
-  @Column({ length: 10 })
-  type: string;
+  @Column({ length: 10, nullable: true })
+  type: InstrumentType;
 }
