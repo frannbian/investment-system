@@ -2,49 +2,97 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order } from './order.entity';
+import { Order, OrderSide, OrderType } from './order.entity';
+import { UsersService } from 'src/users/users.service';
+import { InstrumentsService } from 'src/instruments/instruments.service';
+import { MarketDataService } from 'src/market-data/market-data.service';
+import { CashInOrder } from './classes/cash-in-order';
+import { CashOutOrder } from './classes/cash-out-order';
+import { AbstractOrder } from './classes/abstract-order';
+import { BuyMarketOrder } from './classes/buy-market-order';
+import { BuyLimitOrder } from './classes/buy-limit-order';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+    private readonly instrumentsService: InstrumentsService,
+    private readonly usersService: UsersService,
+    private readonly marketDataService: MarketDataService,
   ) {}
 
-  async findAll() {
+  async findAll(): Promise<Order[]> {
     return await this.orderRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Order> {
     const order = await this.orderRepository.findOne({ where: { id } });
     if (!order) {
-      throw new NotFoundException('order not found');
+      throw new NotFoundException('Order not found');
     }
     return order;
   }
 
-  async create(createUserDto: CreateOrderDto) {
-    const newUser = this.orderRepository.create(createUserDto);
-    return await this.orderRepository.save(newUser);
+  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+    const newOrder = this.orderRepository.create(createOrderDto);
+
+    const orderClass: AbstractOrder = this.getOrderStrategy(createOrderDto);
+
+    newOrder.user = await orderClass.handleOrderUser(createOrderDto);
+
+    newOrder.instrument =
+      await orderClass.handleOrderInstrument(createOrderDto);
+
+    const orderPrice = await orderClass.handleOrderPrice(createOrderDto);
+    if (orderPrice) {
+      newOrder.price = orderPrice;
+    }
+
+    newOrder.size = await orderClass.handleOrderSize(createOrderDto, newOrder);
+
+    newOrder.status = await orderClass.handleOrderStatus(
+      createOrderDto,
+      orderPrice,
+    );
+
+    newOrder.datetime = new Date();
+
+    return await this.orderRepository.save(newOrder);
   }
 
-  async update(id: number, attrs: Partial<Order>) {
+  async update(id: number, attrs: Partial<Order>): Promise<Order> {
     const order = await this.findOne(id);
-    if (!order) {
-      throw new NotFoundException('order not found');
-    }
     Object.assign(order, attrs);
     return this.orderRepository.save(order);
   }
 
-  async remove(id: number) {
-    const order = await this.orderRepository.findOne({ where: { id } });
-    if (!order) {
-      throw new NotFoundException('order not found');
-    }
-    if (order) {
-      await this.orderRepository.remove(order);
-    }
+  async remove(id: number): Promise<Order> {
+    const order = await this.findOne(id);
+    await this.orderRepository.remove(order);
     return order;
+  }
+
+  private getOrderStrategy(createOrderDto: CreateOrderDto): AbstractOrder {
+    switch (createOrderDto.side) {
+      case OrderSide.CASH_IN:
+        return new CashInOrder(this.instrumentsService, this.usersService);
+      case OrderSide.CASH_OUT:
+        return new CashOutOrder(this.instrumentsService, this.usersService);
+      case OrderSide.BUY:
+        if (createOrderDto.type === OrderType.MARKET) {
+          return new BuyMarketOrder(
+            this.instrumentsService,
+            this.usersService,
+            this.marketDataService,
+          );
+        }
+        return new BuyLimitOrder(
+          this.instrumentsService,
+          this.usersService,
+          this.marketDataService,
+        );
+    }
+    throw new Error('Invalid order side or type');
   }
 }

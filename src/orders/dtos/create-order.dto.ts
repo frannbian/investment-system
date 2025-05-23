@@ -1,27 +1,31 @@
 import { IsNumber, IsString, IsEnum, IsNotEmpty } from 'class-validator';
+import { OrderSide, OrderType } from '../order.entity';
 
 export class CreateOrderDto {
   @IsNumber()
+  @IsNotEmpty()
   instrumentId: number;
 
   @IsNumber()
+  @IsNotEmpty()
   userId: number;
 
   @IsString()
-  @IsEnum(['buy', 'sell'])
-  side: string;
+  @IsNotEmpty()
+  @IsEnum(OrderSide, {
+    message:
+      'side must be one of the following values: BUY, SELL, CASH_IN, CASH_OUT',
+  })
+  side: OrderSide;
 
   @IsNumber()
+  @IsNotEmpty()
   size: number;
-
-  @IsNumber()
-  price: number;
-
-  @IsString()
-  @IsEnum(['market', 'limit'])
-  type: string;
 
   @IsString()
   @IsNotEmpty()
-  status: string;
+  @IsEnum(OrderType, {
+    message: 'side must be one of the following values: MARKET, LIMIT',
+  })
+  type: OrderType;
 }
