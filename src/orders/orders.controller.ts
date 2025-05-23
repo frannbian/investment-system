@@ -49,9 +49,18 @@ export class OrdersController {
     try {
       return await this.ordersService.create(createOrderDto);
     } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post(':id/cancel')
+  async cancelOrder(@Param('id', ParseIntPipe) id: number) {
+    try {
+      return await this.ordersService.cancelOrder(id);
+    } catch (error) {
       throw new HttpException(
-        error.message,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message || 'Failed to cancel order',
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

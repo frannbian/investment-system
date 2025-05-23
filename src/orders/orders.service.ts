@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order, OrderSide, OrderType } from './order.entity';
+import { Order, OrderSide, OrderType, OrderStatus } from './order.entity';
 import { UsersService } from 'src/users/users.service';
 import { InstrumentsService } from 'src/instruments/instruments.service';
 import { MarketDataService } from 'src/market-data/market-data.service';
@@ -71,6 +71,17 @@ export class OrdersService {
     const order = await this.findOne(id);
     await this.orderRepository.remove(order);
     return order;
+  }
+
+  async cancelOrder(id: number): Promise<Order> {
+    const order = await this.findOne(id);
+
+    if (order.status !== OrderStatus.NEW) {
+      throw new Error('Only orders with status "NEW" can be cancelled');
+    }
+
+    order.status = OrderStatus.CANCELLED;
+    return this.orderRepository.save(order);
   }
 
   private getOrderStrategy(createOrderDto: CreateOrderDto): AbstractOrder {
