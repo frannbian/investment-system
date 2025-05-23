@@ -11,6 +11,7 @@ import { CashOutOrder } from './classes/cash-out-order';
 import { AbstractOrder } from './classes/abstract-order';
 import { BuyMarketOrder } from './classes/buy-market-order';
 import { BuyLimitOrder } from './classes/buy-limit-order';
+import { SellOrder } from './classes/sell-order';
 
 @Injectable()
 export class OrdersService {
@@ -90,6 +91,12 @@ export class OrdersService {
         return new CashInOrder(this.instrumentsService, this.usersService);
       case OrderSide.CASH_OUT:
         return new CashOutOrder(this.instrumentsService, this.usersService);
+      case OrderSide.SELL:
+        return new SellOrder(
+          this.instrumentsService,
+          this.usersService,
+          this.marketDataService,
+        );
       case OrderSide.BUY:
         if (createOrderDto.type === OrderType.MARKET) {
           return new BuyMarketOrder(
@@ -104,6 +111,5 @@ export class OrdersService {
           this.marketDataService,
         );
     }
-    throw new Error('Invalid order side or type');
   }
 }

@@ -38,9 +38,8 @@ export class SellOrder extends AbstractOrder {
 
   async handleOrderStatus(
     createOrderDto: CreateOrderDto,
-    price: number,
   ): Promise<OrderStatus> {
-    if (!(await this.isValidTransaction(createOrderDto, price))) {
+    if (!(await this.isValidTransaction(createOrderDto))) {
       return OrderStatus.REJECTED;
     }
     return OrderStatus.FILLED;
@@ -48,15 +47,13 @@ export class SellOrder extends AbstractOrder {
 
   protected async isValidTransaction(
     createOrderDto: CreateOrderDto,
-    price: number,
   ): Promise<boolean> {
-    const orderAmount: number = price;
-
-    const availableCash = await this.usersService.getAvailableCash(
+    const availableInstrument = await this.usersService.getAvailableInstrument(
       createOrderDto.userId,
+      createOrderDto.instrumentId,
     );
 
-    if (availableCash < orderAmount) {
+    if (availableInstrument < createOrderDto.size) {
       return false;
     }
 

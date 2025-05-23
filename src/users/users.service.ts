@@ -130,16 +130,19 @@ export class UsersService {
     return instrumentsPurchased - instrumentsSold;
   }
 
-  private async sumOrderSizes(userId: number, side: OrderSide): Promise<number> {
+  private async sumOrderSizes(
+    userId: number,
+    side: OrderSide,
+  ): Promise<number> {
     const query = `
       SELECT SUM(o.size) AS totalSize, SUM(o.price) AS totalPrice
       FROM orders o
       WHERE o.user_id = $1 AND o.status = 'FILLED' AND o.side = $2
     `;
-    const result = await this.executeQuery<{ totalsize: string | null, totalprice: string | null }>(query, [
-      userId,
-      side.toString(),
-    ]);
+    const result = await this.executeQuery<{
+      totalsize: string | null;
+      totalprice: string | null;
+    }>(query, [userId, side.toString()]);
 
     if (side === OrderSide.CASH_IN || side === OrderSide.CASH_OUT) {
       return parseFloat(result[0]?.totalsize || '0');
@@ -159,14 +162,15 @@ export class UsersService {
       WHERE o.user_id = $1 AND o.instrument_id = $2 AND o.status = 'FILLED' AND o.side = $3
     `;
     const result = await this.executeQuery<{ totalsize: string | null }>(query, [
-      userId,
-      instrumentId,
-      side.toString(),
+      [[userId, instrumentId, side.toString()]],
     ]);
     return parseFloat(result[0]?.totalsize || '0');
   }
 
-  private async executeQuery<T>(query: string, parameters: any[]): Promise<T[]> {
+  private async executeQuery<T>(
+    query: string,
+    parameters: any[],
+  ): Promise<T[]> {
     return this.userRepository.query(query, parameters);
   }
 }
