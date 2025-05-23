@@ -11,6 +11,8 @@ import { User } from './users/user.entity';
 import { Order } from './orders/order.entity';
 import { MarketData } from './market-data/market-data.entity';
 import { Instrument } from './instruments/instrument.entity';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -32,6 +34,14 @@ import { Instrument } from './instruments/instrument.entity';
     InstrumentsModule,
     OrdersModule,
     MarketDataModule,
+    CacheModule.register({
+      store: redisStore,
+      host: 'localhost', // Redis server host
+      port: 6379, // Redis server port
+      ttl: 5000, // Cache expiration time
+      max: 10, // Maximum number of items in cache
+      isGlobal: true,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
