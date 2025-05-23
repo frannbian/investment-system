@@ -45,25 +45,13 @@ export class Order {
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   price: number;
 
-  @Column({
-    type: 'enum',
-    enum: OrderType,
-    nullable: true,
-  })
+  @Column({ length: 10 })
   type: OrderType;
 
-  @Column({
-    type: 'enum',
-    enum: OrderSide,
-    nullable: true,
-  })
+  @Column({ length: 10 })
   side: OrderSide;
 
-  @Column({
-    type: 'enum',
-    enum: OrderStatus,
-    nullable: true,
-  })
+  @Column({ length: 20 })
   status: OrderStatus;
 
   @Column()

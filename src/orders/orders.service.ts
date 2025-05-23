@@ -24,7 +24,9 @@ export class OrdersService {
   ) {}
 
   async findAll(): Promise<Order[]> {
-    return await this.orderRepository.find();
+    return await this.orderRepository.find({
+      relations: ['user', 'instrument'],
+    });
   }
 
   async findOne(id: number): Promise<Order> {
