@@ -36,10 +36,10 @@ import { redisStore } from 'cache-manager-redis-store';
     MarketDataModule,
     CacheModule.register({
       store: redisStore,
-      host: 'localhost', // Redis server host
-      port: 6379, // Redis server port
-      ttl: 5000, // Cache expiration time
-      max: 10, // Maximum number of items in cache
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
+      ttl: 5000,
+      max: 10,
       isGlobal: true,
     }),
   ],
