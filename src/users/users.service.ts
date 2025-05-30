@@ -140,14 +140,14 @@ export class UsersService {
       WHERE o.user_id = $1 AND o.status = 'FILLED' AND o.side = $2
     `;
     const result = await this.executeQuery<{
-      totalsize: string | null;
-      totalprice: string | null;
+      totalSize: string | null;
+      totalPrice: string | null;
     }>(query, [userId, side.toString()]);
 
     if (side === OrderSide.CASH_IN || side === OrderSide.CASH_OUT) {
-      return parseFloat(result[0]?.totalsize || '0');
+      return parseFloat(result[0]?.totalSize || '0');
     } else {
-      return parseFloat(result[0]?.totalprice || '0');
+      return parseFloat(result[0]?.totalPrice || '0');
     }
   }
 

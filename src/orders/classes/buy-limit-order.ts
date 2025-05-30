@@ -4,6 +4,7 @@ import { CreateOrderDto } from '../dtos/create-order.dto';
 import { InstrumentsService } from 'src/instruments/instruments.service';
 import { Order, OrderStatus } from '../order.entity';
 import { MarketDataService } from 'src/market-data/market-data.service';
+import { Instrument } from 'src/instruments/instrument.entity';
 
 export class BuyLimitOrder extends AbstractOrder {
   constructor(
@@ -22,16 +23,18 @@ export class BuyLimitOrder extends AbstractOrder {
     createOrderDto: CreateOrderDto,
     order: Order,
   ): Promise<number> {
-    const instrument = await this.instrumentsService.findOne(
+    const instrument: Instrument = await this.instrumentsService.findOne(
       createOrderDto.instrumentId,
     );
 
     const marketData =
       await this.marketDataService.findOneByInstrument(instrument);
+
     const maxShares = Math.floor(createOrderDto.size / marketData.close);
+
     order.price = maxShares * marketData.close;
     if (maxShares <= 0) {
-      throw new Error('Insufficient funds to buy even one share');
+      throw new Error('Insufficient price for the order');
     }
     return maxShares;
   }
