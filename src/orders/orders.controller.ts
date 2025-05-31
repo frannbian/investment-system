@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { OrdersService } from './orders.service';
-import { ClientKafka, ClientProxy, MessagePattern } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('orders')
 export class OrdersController {
@@ -93,7 +93,7 @@ export class OrdersController {
   }
 
   @MessagePattern('order-created')
-  handleOrderCreated(data: CreateOrderDto) {
+  handleOrderCreated(@Payload() data: any) {
     try {
       console.log('Order created event received:', data);
     } catch (error) {
