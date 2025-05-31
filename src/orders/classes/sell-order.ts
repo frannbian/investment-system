@@ -2,7 +2,7 @@ import { UsersService } from 'src/users/users.service';
 import { AbstractOrder } from './abstract-order';
 import { CreateOrderDto } from '../dtos/create-order.dto';
 import { InstrumentsService } from 'src/instruments/instruments.service';
-import { OrderStatus, OrderType } from '../order.entity';
+import { OrderStatus } from '../order.entity';
 import { MarketDataService } from 'src/market-data/market-data.service';
 
 export class SellOrder extends AbstractOrder {

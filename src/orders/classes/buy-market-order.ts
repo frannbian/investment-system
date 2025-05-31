@@ -2,7 +2,7 @@ import { UsersService } from 'src/users/users.service';
 import { AbstractOrder } from './abstract-order';
 import { CreateOrderDto } from '../dtos/create-order.dto';
 import { InstrumentsService } from 'src/instruments/instruments.service';
-import { Order, OrderStatus, OrderType, SizeType } from '../order.entity';
+import { Order, OrderStatus, SizeType } from '../order.entity';
 import { MarketDataService } from 'src/market-data/market-data.service';
 import { Instrument } from 'src/instruments/instrument.entity';
 
