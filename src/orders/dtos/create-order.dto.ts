@@ -31,7 +31,7 @@ export class CreateOrderDto {
   @IsNumber()
   @ValidateIf((o: CreateOrderDto) => o.type === OrderType.LIMIT)
   @IsNotEmpty({ message: 'price is required for LIMIT orders' })
-  price: number;
+  price?: number;
 
   @IsString()
   @IsNotEmpty()
@@ -49,5 +49,5 @@ export class CreateOrderDto {
   @IsEnum(SizeType, {
     message: 'size type must be one of the following values: QUANTITY, CASH',
   })
-  sizeType: SizeType;
+  sizeType?: SizeType;
 }

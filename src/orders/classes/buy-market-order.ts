@@ -74,7 +74,7 @@ export class BuyMarketOrder extends AbstractOrder {
     const availableCash = await this.usersService.getAvailableCash(
       createOrderDto.userId,
     );
-    console.log(availableCash, orderAmount);
+
     if (availableCash < orderAmount) {
       return false;
     }

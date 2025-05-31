@@ -14,7 +14,7 @@ export class BuyLimitOrder extends AbstractOrder {
     super(instrumentsService, usersService, marketDataService);
   }
 
-  handleOrderPrice(createOrderDto: CreateOrderDto): number {
+  handleOrderPrice(createOrderDto: CreateOrderDto): number | undefined {
     return createOrderDto.price;
   }
 

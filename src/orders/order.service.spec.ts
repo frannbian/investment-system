@@ -1,26 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersService } from './orders.service';
-import { Order, OrderSide, OrderStatus, OrderType } from './order.entity';
+import {
+  Order,
+  OrderSide,
+  OrderStatus,
+  OrderType,
+  SizeType,
+} from './order.entity';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { InstrumentsService } from 'src/instruments/instruments.service';
 import { MarketDataService } from 'src/market-data/market-data.service';
 import { UsersService } from 'src/users/users.service';
-import { Instrument } from 'src/instruments/instrument.entity';
+import { Instrument, InstrumentType } from 'src/instruments/instrument.entity';
 import { MarketData } from 'src/market-data/market-data.entity';
 import { User } from 'src/users/user.entity';
 
-async function addFundsToUser(service: OrdersService) {
-  const createOrderDto: CreateOrderDto = {
-    side: OrderSide.CASH_IN,
-    type: OrderType.MARKET,
-    instrumentId: 2,
-    userId: 1,
-    size: 100000,
-  };
-
-  await service.create(createOrderDto);
-}
 
 describe('Testing order service flows', () => {
   let service: OrdersService;
@@ -28,18 +23,31 @@ describe('Testing order service flows', () => {
   let instrumentsService: InstrumentsService;
   let marketDataService: MarketDataService;
 
-  const mockMarketDataService = {
-    findOneByInstrument: jest.fn().mockResolvedValue({
-      high: 342.5,
-      low: 328.5,
-      open: 337.5,
-      close: 341.5,
-      previousClose: 335.0,
-      instrument_id: 1,
-    }),
-  };
-
   beforeEach(async () => {
+    const mockMarketDataService = {
+      findOneByInstrument: jest.fn().mockResolvedValue({
+        high: 342.5,
+        low: 328.5,
+        open: 337.5,
+        close: 341.5,
+        previousClose: 335.0,
+        instrument_id: 1,
+      }),
+    };
+
+    const mockUsersService = {
+      findOne: jest.fn().mockResolvedValue({
+        id: 1,
+      }),
+      getAvailableCash: jest.fn().mockResolvedValue(100000),
+    };
+
+    const mockInstrumentService = {
+      findOne: jest.fn().mockResolvedValue({
+        id: 1,
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
@@ -53,7 +61,8 @@ describe('Testing order service flows', () => {
       providers: [
         OrdersService,
         UsersService,
-        InstrumentsService,
+        { provide: InstrumentsService, useValue: mockInstrumentService },
+        { provide: UsersService, useValue: mockUsersService },
         { provide: MarketDataService, useValue: mockMarketDataService },
       ],
     }).compile();
@@ -85,90 +94,125 @@ describe('Testing order service flows', () => {
     });
   });
 
-  it('should create a CASH_IN order', async () => {
-    const createOrderDto: CreateOrderDto = {
-      side: OrderSide.CASH_IN,
-      type: OrderType.MARKET,
-      instrumentId: 2,
-      userId: 1,
-      size: 100000,
-    };
+  function createOrderDtoHelper(
+    side: OrderSide,
+    type: OrderType,
+    instrumentId: number,
+    userId: number,
+    size: number,
+  ): CreateOrderDto {
+    return { side, type, instrumentId, userId, size };
+  }
 
+  function expectOrder(
+    order: Order,
+    expected: {
+      side: string;
+      type: string;
+      status: string;
+      size: number;
+      instrumentId: number;
+      userId: number;
+    },
+  ) {
+    expect(order).toBeDefined();
+    expect(order.side).toBe(expected.side);
+    expect(order.type).toBe(expected.type);
+    expect(order.status).toBe(expected.status);
+    expect(order.size).toBe(expected.size);
+    expect(order.instrument.id).toBe(expected.instrumentId);
+    expect(order.user.id).toBe(expected.userId);
+  }
+
+  it('should create a CASH_IN order', async () => {
+    jest.spyOn(instrumentsService, 'findOne').mockResolvedValue({
+      id: 2,
+      name: 'Pesos.',
+      ticker: 'ARS',
+      type: InstrumentType.MONEDA,
+    });
+
+    const createOrderDto = createOrderDtoHelper(
+      OrderSide.CASH_IN,
+      OrderType.MARKET,
+      2,
+      1,
+      100000,
+    );
     await service.create(createOrderDto);
     const orders = await service.findAll();
 
     expect(orders.length).toBe(1);
-    expect(orders[0].side).toBe(OrderSide.CASH_IN.toString());
-    expect(orders[0].type).toBe(OrderType.MARKET.toString());
-    expect(orders[0].size).toBe(100000);
-    expect(orders[0].instrument.id).toBe(2);
-    expect(orders[0].user.id).toBe(1);
+    expectOrder(orders[0], {
+      side: OrderSide.CASH_IN.toString(),
+      type: OrderType.MARKET.toString(),
+      status: OrderStatus.FILLED.toString(), // Assuming FILLED is the default status for CASH_IN
+      size: 100000,
+      instrumentId: 2,
+      userId: 1,
+    });
   });
 
-  it('should throw an error when user try to buy a LIMIT order with a lower price that the unit of the instrument', async () => {
-    const createOrderDto: CreateOrderDto = {
-      side: OrderSide.BUY,
-      type: OrderType.LIMIT,
-      instrumentId: 1,
-      userId: 1,
-      size: 50,
-    };
+  it('should throw an error when user try to buy a MARKET order with a lower price that the unit of the instrument', async () => {
+    const createOrderDto = createOrderDtoHelper(
+      OrderSide.BUY,
+      OrderType.MARKET,
+      1,
+      1,
+      50,
+    );
+    createOrderDto.sizeType = SizeType.CASH;
 
     await expect(service.create(createOrderDto)).rejects.toThrow(
-      'Insufficient price for the order',
+      'Insufficient cash for event 1 unit of the instrument',
     );
   });
 
   it('should create an order with type LIMIT and status should be NEW', async () => {
-    await addFundsToUser(service);
-    const createOrderDto: CreateOrderDto = {
-      side: OrderSide.BUY,
-      type: OrderType.LIMIT,
-      instrumentId: 1,
-      userId: 1,
-      size: 1000,
-    };
-
+    const createOrderDto = createOrderDtoHelper(
+      OrderSide.BUY,
+      OrderType.LIMIT,
+      1,
+      1,
+      1000,
+    );
     const result = await service.create(createOrderDto);
-    const order: Order = await service.findOne(result.id);
+    const order = await service.findOne(result.id);
 
-    expect(order).toBeDefined();
-    expect(order.side).toBe(OrderSide.BUY.toString());
-    expect(order.type).toBe(OrderType.LIMIT.toString());
-    expect(order.status).toBe(OrderStatus.NEW.toString());
-    expect(order.size).toBe(2);
-    expect(order.instrument.id).toBe(1);
-    expect(order.user.id).toBe(1);
-  });
-  it('should cancel an order with status NEW', async () => {
-    await addFundsToUser(service);
-    const createOrderDto: CreateOrderDto = {
-      side: OrderSide.BUY,
-      type: OrderType.LIMIT,
+    expectOrder(order, {
+      side: OrderSide.BUY.toString(),
+      type: OrderType.LIMIT.toString(),
+      status: OrderStatus.NEW.toString(),
+      size: 1000,
       instrumentId: 1,
       userId: 1,
-      size: 1000,
-    };
+    });
+  });
 
-    const result: Order = await service.create(createOrderDto);
-
-    const order: Order = await service.cancelOrder(result.id);
+  it('should cancel an order with status NEW', async () => {
+    const createOrderDto = createOrderDtoHelper(
+      OrderSide.BUY,
+      OrderType.LIMIT,
+      1,
+      1,
+      1000,
+    );
+    const result = await service.create(createOrderDto);
+    const order = await service.cancelOrder(result.id);
 
     expect(order).toBeDefined();
     expect(order.status).toBe(OrderStatus.CANCELLED.toString());
   });
 
   it('should not cancel an order with status different to NEW', async () => {
-    await addFundsToUser(service);
-    const createOrderDto: CreateOrderDto = {
-      side: OrderSide.BUY,
-      type: OrderType.MARKET,
-      instrumentId: 1,
-      userId: 1,
-      size: 1000,
-    };
-
-    const result: Order = await service.create(createOrderDto);
+    const createOrderDto = createOrderDtoHelper(
+      OrderSide.BUY,
+      OrderType.MARKET,
+      1,
+      1,
+      1000,
+    );
+    const result = await service.create(createOrderDto);
 
     await expect(service.cancelOrder(result.id)).rejects.toThrow(
       'Only orders with status "NEW" can be cancelled',
@@ -176,90 +220,100 @@ describe('Testing order service flows', () => {
   });
 
   it('should create an order with type MARKET and status should be FILLED', async () => {
-    await addFundsToUser(service);
-    const createOrderDto: CreateOrderDto = {
-      side: OrderSide.BUY,
-      type: OrderType.MARKET,
+    const createOrderDto = createOrderDtoHelper(
+      OrderSide.BUY,
+      OrderType.MARKET,
+      1,
+      1,
+      10,
+    );
+    const result = await service.create(createOrderDto);
+    const order = await service.findOne(result.id);
+
+    expectOrder(order, {
+      side: OrderSide.BUY.toString(),
+      type: OrderType.MARKET.toString(),
+      status: OrderStatus.FILLED.toString(),
+      size: 10,
       instrumentId: 1,
       userId: 1,
-      size: 10,
-    };
-
-    const result = await service.create(createOrderDto);
-    const order: Order = await service.findOne(result.id);
-
-    expect(order).toBeDefined();
-    expect(order.side).toBe(OrderSide.BUY.toString());
-    expect(order.type).toBe(OrderType.MARKET.toString());
-    expect(order.status).toBe(OrderStatus.FILLED.toString());
-    expect(order.size).toBe(10);
-    expect(order.instrument.id).toBe(1);
-    expect(order.user.id).toBe(1);
+    });
   });
 
   it('should create an order with type MARKET and status should be REJECTED if user has not founds to complete the order', async () => {
-    await addFundsToUser(service);
-    const createOrderDto: CreateOrderDto = {
-      side: OrderSide.BUY,
-      type: OrderType.MARKET,
+    const createOrderDto = createOrderDtoHelper(
+      OrderSide.BUY,
+      OrderType.MARKET,
+      1,
+      1,
+      1000,
+    );
+    const result = await service.create(createOrderDto);
+    const order = await service.findOne(result.id);
+
+    expectOrder(order, {
+      side: OrderSide.BUY.toString(),
+      type: OrderType.MARKET.toString(),
+      status: OrderStatus.REJECTED.toString(),
+      size: 1000,
       instrumentId: 1,
       userId: 1,
-      size: 1000,
-    };
-
-    const result = await service.create(createOrderDto);
-    const order: Order = await service.findOne(result.id);
-
-    expect(order).toBeDefined();
-    expect(order.side).toBe(OrderSide.BUY.toString());
-    expect(order.type).toBe(OrderType.MARKET.toString());
-    expect(order.status).toBe(OrderStatus.REJECTED.toString());
-    expect(order.size).toBe(1000);
-    expect(order.instrument.id).toBe(1);
-    expect(order.user.id).toBe(1);
+    });
   });
 
   it('should create a CASH_OUT order', async () => {
-    await addFundsToUser(service);
-    const createOrderDto: CreateOrderDto = {
-      side: OrderSide.CASH_OUT,
-      type: OrderType.MARKET,
+    jest.spyOn(instrumentsService, 'findOne').mockResolvedValue({
+      id: 2,
+      name: 'Pesos.',
+      ticker: 'ARS',
+      type: InstrumentType.MONEDA,
+    });
+
+    const createOrderDto = createOrderDtoHelper(
+      OrderSide.CASH_OUT,
+      OrderType.MARKET,
+      2,
+      1,
+      10000,
+    );
+    const result = await service.create(createOrderDto);
+    const order = await service.findOne(result.id);
+
+    expectOrder(order, {
+      side: OrderSide.CASH_OUT.toString(),
+      type: OrderType.MARKET.toString(),
+      status: OrderStatus.FILLED.toString(),
+      size: 10000,
       instrumentId: 2,
       userId: 1,
-      size: 10000,
-    };
-
-    const result = await service.create(createOrderDto);
-    const order: Order = await service.findOne(result.id);
-
-    expect(order).toBeDefined();
-    expect(order.side).toBe(OrderSide.CASH_OUT.toString());
-    expect(order.type).toBe(OrderType.MARKET.toString());
-    expect(order.status).toBe(OrderStatus.FILLED.toString());
-    expect(order.size).toBe(10000);
-    expect(order.instrument.id).toBe(2);
-    expect(order.user.id).toBe(1);
+    });
   });
 
   it('should not create a CASH_OUT order if the user has not funds', async () => {
-    await addFundsToUser(service);
-    const createOrderDto: CreateOrderDto = {
-      side: OrderSide.CASH_OUT,
-      type: OrderType.MARKET,
+    jest.spyOn(instrumentsService, 'findOne').mockResolvedValue({
+      id: 2,
+      name: 'Pesos.',
+      ticker: 'ARS',
+      type: InstrumentType.MONEDA,
+    });
+
+    const createOrderDto = createOrderDtoHelper(
+      OrderSide.CASH_OUT,
+      OrderType.MARKET,
+      2,
+      1,
+      1000000,
+    );
+    const result = await service.create(createOrderDto);
+    const order = await service.findOne(result.id);
+
+    expectOrder(order, {
+      side: OrderSide.CASH_OUT.toString(),
+      type: OrderType.MARKET.toString(),
+      status: OrderStatus.REJECTED.toString(),
+      size: 1000000,
       instrumentId: 2,
       userId: 1,
-      size: 1000000,
-    };
-
-    const result = await service.create(createOrderDto);
-    const order: Order = await service.findOne(result.id);
-
-    expect(order).toBeDefined();
-    expect(order.side).toBe(OrderSide.CASH_OUT.toString());
-    expect(order.type).toBe(OrderType.MARKET.toString());
-    expect(order.status).toBe(OrderStatus.REJECTED.toString());
-    expect(order.size).toBe(10000);
-    expect(order.instrument.id).toBe(2);
-    expect(order.user.id).toBe(1);
+    });
   });
 });
