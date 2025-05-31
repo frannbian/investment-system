@@ -134,20 +134,22 @@ export class UsersService {
     userId: number,
     side: OrderSide,
   ): Promise<number> {
-    const query = `
-      SELECT SUM(o.size) AS totalSize, SUM(o.price) AS totalPrice
-      FROM orders o
-      WHERE o.user_id = $1 AND o.status = 'FILLED' AND o.side = $2
-    `;
-    const result = await this.executeQuery<{
-      totalSize: string | null;
-      totalPrice: string | null;
-    }>(query, [userId, side.toString()]);
+    const queryBuilder = this.userRepository.manager
+      .createQueryBuilder()
+      .select('SUM(o.size)', 'totalsize')
+      .addSelect('SUM(o.price)', 'totalprice')
+      .from('orders', 'o')
+      .where('o.user_id = :userId', { userId })
+      .andWhere('o.status = :status', { status: 'FILLED' })
+      .andWhere('o.side = :side', { side: side.toString() });
+
+    const result: { totalsize: number; totalprice: number } | undefined =
+      await queryBuilder.getRawOne();
 
     if (side === OrderSide.CASH_IN || side === OrderSide.CASH_OUT) {
-      return parseFloat(result[0]?.totalSize || '0');
+      return result?.totalsize || 0;
     } else {
-      return parseFloat(result[0]?.totalPrice || '0');
+      return result?.totalprice || 0;
     }
   }
 
