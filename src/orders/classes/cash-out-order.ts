@@ -12,11 +12,11 @@ export class CashOutOrder extends AbstractOrder {
     super(instrumentsService, usersService);
   }
 
-  handleOrderPrice(): Promise<number> | undefined {
+  handleOrderPrice(): undefined {
     return;
   }
 
-  handleOrderSize(createOrderDto: CreateOrderDto): Promise<number> | number {
+  handleOrderSize(createOrderDto: CreateOrderDto): number {
     return createOrderDto.size;
   }
 

@@ -2,7 +2,7 @@ import { UsersService } from 'src/users/users.service';
 import { AbstractOrder } from './abstract-order';
 import { CreateOrderDto } from '../dtos/create-order.dto';
 import { InstrumentsService } from 'src/instruments/instruments.service';
-import { Order as OrderEntity, OrderStatus } from '../order.entity';
+import { OrderStatus } from '../order.entity';
 
 export class CashInOrder extends AbstractOrder {
   constructor(
@@ -12,21 +12,15 @@ export class CashInOrder extends AbstractOrder {
     super(instrumentsService, usersService);
   }
 
-  handleOrderPrice(createOrderDto: CreateOrderDto): Promise<number> | undefined {
+  handleOrderPrice(): undefined {
     return;
   }
 
-  handleOrderSize(
-    createOrderDto: CreateOrderDto,
-    order?: OrderEntity,
-  ): Promise<number> | number {
+  handleOrderSize(createOrderDto: CreateOrderDto): number {
     return createOrderDto.size;
   }
 
-  handleOrderStatus(
-    createOrderDto: CreateOrderDto,
-    price?: number,
-  ): OrderStatus {
+  handleOrderStatus(): OrderStatus {
     return OrderStatus.FILLED;
   }
 

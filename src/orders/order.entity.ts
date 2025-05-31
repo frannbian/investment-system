@@ -26,6 +26,10 @@ export enum OrderType {
   MARKET = 'MARKET',
   LIMIT = 'LIMIT',
 }
+export enum SizeType {
+  CASH = 'CASH',
+  QUANTITY = 'QUANTITY',
+}
 @Entity('orders')
 export class Order {
   @PrimaryGeneratedColumn()

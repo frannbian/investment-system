@@ -2,9 +2,8 @@ import { UsersService } from 'src/users/users.service';
 import { AbstractOrder } from './abstract-order';
 import { CreateOrderDto } from '../dtos/create-order.dto';
 import { InstrumentsService } from 'src/instruments/instruments.service';
-import { Order, OrderStatus } from '../order.entity';
+import { OrderStatus } from '../order.entity';
 import { MarketDataService } from 'src/market-data/market-data.service';
-import { Instrument } from 'src/instruments/instrument.entity';
 
 export class BuyLimitOrder extends AbstractOrder {
   constructor(
@@ -15,28 +14,12 @@ export class BuyLimitOrder extends AbstractOrder {
     super(instrumentsService, usersService, marketDataService);
   }
 
-  handleOrderPrice(): Promise<number> | undefined {
-    return;
+  handleOrderPrice(createOrderDto: CreateOrderDto): number {
+    return createOrderDto.price;
   }
 
-  async handleOrderSize(
-    createOrderDto: CreateOrderDto,
-    order: Order,
-  ): Promise<number> {
-    const instrument: Instrument = await this.instrumentsService.findOne(
-      createOrderDto.instrumentId,
-    );
-
-    const marketData =
-      await this.marketDataService.findOneByInstrument(instrument);
-
-    const maxShares = Math.floor(createOrderDto.size / marketData.close);
-
-    order.price = maxShares * marketData.close;
-    if (maxShares <= 0) {
-      throw new Error('Insufficient price for the order');
-    }
-    return maxShares;
+  handleOrderSize(createOrderDto: CreateOrderDto): number {
+    return createOrderDto.size;
   }
 
   async handleOrderStatus(

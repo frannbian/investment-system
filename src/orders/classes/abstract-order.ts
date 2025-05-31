@@ -15,7 +15,7 @@ export abstract class AbstractOrder {
 
   abstract handleOrderPrice(
     createOrderDto: CreateOrderDto,
-  ): Promise<number | undefined> | undefined;
+  ): Promise<number | undefined> | number | undefined;
 
   abstract handleOrderSize(
     createOrderDto: CreateOrderDto,

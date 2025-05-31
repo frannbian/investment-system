@@ -1,5 +1,11 @@
-import { IsNumber, IsString, IsEnum, IsNotEmpty } from 'class-validator';
-import { OrderSide, OrderType } from '../order.entity';
+import {
+  IsNumber,
+  IsString,
+  IsEnum,
+  IsNotEmpty,
+  ValidateIf,
+} from 'class-validator';
+import { OrderSide, OrderType, SizeType } from '../order.entity';
 
 export class CreateOrderDto {
   @IsNumber()
@@ -22,10 +28,23 @@ export class CreateOrderDto {
   @IsNotEmpty()
   size: number;
 
+  @IsNumber()
+  @ValidateIf((o: CreateOrderDto) => o.type === OrderType.LIMIT)
+  @IsNotEmpty({ message: 'price is required for LIMIT orders' })
+  price: number;
+
   @IsString()
   @IsNotEmpty()
   @IsEnum(OrderType, {
     message: 'side must be one of the following values: MARKET, LIMIT',
   })
   type: OrderType;
+
+  @IsString()
+  @ValidateIf((o: CreateOrderDto) => o.type === OrderType.MARKET)
+  @IsNotEmpty({ message: 'sizeType is required for LIMIT orders' })
+  @IsEnum(SizeType, {
+    message: 'side must be one of the following values: QUANTITY, CASH',
+  })
+  sizeType: SizeType;
 }
