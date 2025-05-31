@@ -1,4 +1,4 @@
-name: CI - Test
+name: 'Pull Request CI (target: main)'
 
 on:
   pull_request:
