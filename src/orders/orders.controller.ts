@@ -91,17 +91,4 @@ export class OrdersController {
       );
     }
   }
-
-  @MessagePattern('order-created')
-  handleOrderCreated(@Payload() data: any) {
-    try {
-      console.log('Order created event received:', data);
-    } catch (error) {
-      console.error('Error handling order created event:', error);
-      throw new HttpException(
-        'Failed to process order created event',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
 }

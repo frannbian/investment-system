@@ -14,6 +14,8 @@ import { Instrument } from './instruments/instrument.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { NotificationsController } from './notifications/notifications.controller';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -54,6 +56,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       max: 10,
       isGlobal: true,
     }),
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
