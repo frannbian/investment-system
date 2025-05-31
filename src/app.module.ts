@@ -13,6 +13,7 @@ import { MarketData } from './market-data/market-data.entity';
 import { Instrument } from './instruments/instrument.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -30,6 +31,17 @@ import { redisStore } from 'cache-manager-redis-store';
       entities: [User, Order, MarketData, Instrument],
       synchronize: true,
     }),
+    ClientsModule.register([
+      {
+        name: 'KAKFA_SERVICE', // Register the Kafka client
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            brokers: ['localhost:9092'], // Replace with your Kafka broker(s)
+          },
+        },
+      },
+    ]),
     UsersModule,
     InstrumentsModule,
     OrdersModule,
