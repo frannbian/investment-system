@@ -23,13 +23,7 @@ export class SellOrder extends AbstractOrder {
     const marketData =
       await this.marketDataService.findOneByInstrument(instrument);
 
-    if (createOrderDto.type === OrderType.MARKET) {
-      return marketData.close * createOrderDto.size;
-    } else if (createOrderDto.type === OrderType.LIMIT) {
-      return createOrderDto.size;
-    }
-
-    throw new Error('Invalid order type for price determination');
+    return marketData.close * createOrderDto.size;
   }
 
   handleOrderSize(createOrderDto: CreateOrderDto): Promise<number> | number {

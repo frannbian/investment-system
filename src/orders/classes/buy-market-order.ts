@@ -2,7 +2,7 @@ import { UsersService } from 'src/users/users.service';
 import { AbstractOrder } from './abstract-order';
 import { CreateOrderDto } from '../dtos/create-order.dto';
 import { InstrumentsService } from 'src/instruments/instruments.service';
-import { Order, OrderStatus, OrderType } from '../order.entity';
+import { Order, OrderStatus, OrderType, SizeType } from '../order.entity';
 import { MarketDataService } from 'src/market-data/market-data.service';
 import { Instrument } from 'src/instruments/instrument.entity';
 
@@ -21,23 +21,22 @@ export class BuyMarketOrder extends AbstractOrder {
     const instrument = await this.instrumentsService.findOne(
       createOrderDto.instrumentId,
     );
-    const marketData =
-      await this.marketDataService.findOneByInstrument(instrument);
 
-    if (createOrderDto.type === OrderType.MARKET) {
-      return marketData.close * createOrderDto.size;
-    } else if (createOrderDto.type === OrderType.LIMIT) {
+    if (createOrderDto.sizeType === SizeType.CASH) {
       return createOrderDto.size;
     }
 
-    throw new Error('Invalid order type for price determination');
+    const marketData =
+      await this.marketDataService.findOneByInstrument(instrument);
+
+    return marketData.close * createOrderDto.size;
   }
 
   async handleOrderSize(
     createOrderDto: CreateOrderDto,
     order: Order,
   ): Promise<number> {
-    if (createOrderDto.price) {
+    if (createOrderDto.sizeType === SizeType.CASH) {
       const instrument: Instrument = await this.instrumentsService.findOne(
         createOrderDto.instrumentId,
       );
@@ -49,7 +48,7 @@ export class BuyMarketOrder extends AbstractOrder {
 
       order.price = maxShares * marketData.close;
       if (maxShares <= 0) {
-        throw new Error('Insufficient price for the order');
+        throw new Error('Insufficient cash for event 1 unit of the instrument');
       }
       return maxShares;
     }
@@ -75,7 +74,7 @@ export class BuyMarketOrder extends AbstractOrder {
     const availableCash = await this.usersService.getAvailableCash(
       createOrderDto.userId,
     );
-
+    console.log(availableCash, orderAmount);
     if (availableCash < orderAmount) {
       return false;
     }

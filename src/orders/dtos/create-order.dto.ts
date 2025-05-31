@@ -41,10 +41,13 @@ export class CreateOrderDto {
   type: OrderType;
 
   @IsString()
-  @ValidateIf((o: CreateOrderDto) => o.type === OrderType.MARKET)
+  @ValidateIf(
+    (o: CreateOrderDto) =>
+      o.type === OrderType.MARKET && o.side === OrderSide.BUY,
+  )
   @IsNotEmpty({ message: 'sizeType is required for LIMIT orders' })
   @IsEnum(SizeType, {
-    message: 'side must be one of the following values: QUANTITY, CASH',
+    message: 'size type must be one of the following values: QUANTITY, CASH',
   })
   sizeType: SizeType;
 }
