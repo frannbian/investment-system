@@ -98,7 +98,6 @@ export class UsersService {
       .addGroupBy('md.close')
       .addGroupBy('md.previous_close');
 
-
     const orders = await queryBuilder.getRawMany();
 
     let totalAssetsValue = 0;
