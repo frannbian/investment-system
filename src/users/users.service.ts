@@ -55,58 +55,77 @@ export class UsersService {
   }
 
   async getPortfolio(userId: number) {
-    const assets = await this.getAssets(userId);
+    const summary = await this.getUserSummary(userId);
     const availableCash = await this.getAvailableCash(userId);
     return {
-      totalAccountValue: assets.totalAssetsValue + availableCash,
+      totalAccountValue: summary.totalAssetsValue + availableCash,
       availableCash,
-      assets,
+      summary,
     };
   }
 
-  async getAssets(userId: number) {
-    const query = `
-      SELECT o.instrument_id, SUM(o.size) AS totalSize, i.name, i.ticker, i.type, md.close AS currentPrice, md.previous_close as previousClose
-      FROM orders o
-      JOIN instruments i ON o.instrument_id = i.id
-      JOIN marketdata md ON md.instrument_id = i.id
-      WHERE o.user_id = $1 AND o.status = 'FILLED'
-      GROUP BY o.instrument_id, i.name, i.ticker, i.type, md.close, md.previous_close
-    `;
-    const assetsOrders = await this.executeQuery<{
-      instrument_id: number;
-      totalsize: string;
-      name: string;
-      ticker: string;
-      type: string;
-      currentprice: string;
-      previousclose: string;
-    }>(query, [userId]);
+  async getUserSummary(userId: number) {
+    const queryBuilder = this.userRepository.manager
+      .createQueryBuilder()
+      .select('i.ticker', 'ticker')
+      .addSelect('i.name', 'name')
+      .addSelect('i.type', 'type')
+      .addSelect('md.close', 'currentPrice')
+      .addSelect('o.instrument_id', 'instrumentId')
+      .addSelect('SUM(o.size)', 'totalSize')
+      .addSelect('md.previous_close', 'previousClose')
+      .from('orders', 'o')
+      .innerJoin('instruments', 'i', 'o.instrument_id = i.id')
+      .innerJoin(
+        (qb) =>
+          qb
+            .select('DISTINCT ON (instrument_id) instrument_id')
+            .addSelect('close')
+            .addSelect('previous_close')
+            .addSelect('date')
+            .from('marketdata', 'md')
+            .orderBy('instrument_id')
+            .addOrderBy('date', 'DESC'),
+        'md',
+        'md.instrument_id = i.id',
+      )
+      .where('o.user_id = :userId', { userId })
+      .andWhere('o.status = :status', { status: 'FILLED' })
+      .groupBy('o.instrument_id')
+      .addGroupBy('i.name')
+      .addGroupBy('i.ticker')
+      .addGroupBy('i.type')
+      .addGroupBy('md.close')
+      .addGroupBy('md.previous_close');
+
+
+    const orders = await queryBuilder.getRawMany();
 
     let totalAssetsValue = 0;
 
-    const assets = assetsOrders.map((order) => {
+    const summary = orders.map((order) => {
       const totalValue =
-        parseFloat(order.totalsize) * parseFloat(order.currentprice);
+        parseFloat(order.totalSize) * parseFloat(order.currentPrice);
       totalAssetsValue += totalValue;
 
+      const totalPrice =
+        parseFloat(order.totalSize) * parseFloat(order.previousClose);
+      const performance = ((totalValue - totalPrice) / totalPrice) * 100;
+
       return {
-        instrumentId: order.instrument_id,
+        instrumentId: order.instrumentId,
         name: order.name,
         ticker: order.ticker,
         type: order.type,
-        quantity: parseFloat(order.totalsize),
+        quantity: parseFloat(order.totalSize),
         totalValue,
-        performance:
-          ((parseFloat(order.currentprice) - parseFloat(order.previousclose)) /
-            parseFloat(order.previousclose)) *
-          100,
+        performance,
       };
     });
 
     return {
       totalAssetsValue,
-      assets,
+      summary,
     };
   }
 
@@ -172,12 +191,5 @@ export class UsersService {
       await queryBuilder.getRawOne();
 
     return result?.totalsize || 0;
-  }
-
-  private async executeQuery<T>(
-    query: string,
-    parameters: any[],
-  ): Promise<T[]> {
-    return this.userRepository.query(query, parameters);
   }
 }

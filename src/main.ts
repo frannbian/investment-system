@@ -12,14 +12,14 @@ async function bootstrap() {
   // Configure class-validator to use NestJS's dependency injection
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: ['localhost:9092'],
-      },
-    },
-  });
+  // app.connectMicroservice<MicroserviceOptions>({
+  //   transport: Transport.KAFKA,
+  //   options: {
+  //     client: {
+  //       brokers: ['localhost:9092'],
+  //     },
+  //   },
+  // });
 
   await app.startAllMicroservices();
 
