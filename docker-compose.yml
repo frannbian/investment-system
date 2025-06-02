@@ -1,0 +1,66 @@
+services:
+  app:
+    build: .
+    container_name: cocos-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - kafka
+      - redis
+    networks:
+      - cocos-net
+
+  db:
+    image: postgres:15
+    container_name: cocos-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: cocos_challange
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - cocos-net
+  redis:
+    image: redis:7
+    container_name: cocos-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - cocos-net
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: cocos-zookeeper
+    restart: unless-stopped
+    ports:
+      - "2181:2181"
+    networks:
+      - cocos-net
+  kafka:
+    image: wurstmeister/kafka
+    container_name: cocos-kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+    depends_on: 
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+    networks:
+      - cocos-net
+volumes:
+  pgdata:
+
+networks:
+  cocos-net:
