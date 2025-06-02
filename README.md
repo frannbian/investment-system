@@ -25,45 +25,32 @@ Ensure you have the following installed on your system:
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/frannbian/cocos-challange
    cd cocos-challange
+   cp .env.example .env
+   code .
    ```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-   or
-   ```bash
-   yarn install
-   ```
-
-### Running the Project
-1. Start the development server:
-   ```bash
-   npm start
-   ```
-   or
-   ```bash
-   yarn start
-   ```
-
-2. Open the project in your browser at `http://localhost:3000` (or the port specified in the configuration).
 
 ### Running the Project in Docker Compose
 To start the project using Docker Compose:
-1. Ensure Docker and Docker Compose are installed and running on your system.
-2. Create a `docker-compose.yml` file in the project root (if not already present) with the necessary configuration.
-3. Start the services:
+1. Ensure Docker and Docker Compose are installed and running on your system & all ports that are used by this project are available.
+2. Start the services in background:
    ```bash
-   docker-compose up
+   docker-compose up -d
    ```
-4. Access the application in your browser at `http://localhost:3000` (or the port specified in the `docker-compose.yml` file).
+3. Access the application in your browser at `http://localhost:3000` (or the port specified in the `docker-compose.yml` file).
 
-5. To stop the services, run:
+4. To stop the services, run:
    ```bash
-   docker-compose down
+   docker-compose stop
    ```
+
+### Test the Project
+To build the project for production:
+```bash
+npm run test
+```
 
 ### Building the Project
 To build the project for production:
