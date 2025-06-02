@@ -35,11 +35,11 @@ import { NotificationsModule } from './notifications/notifications.module';
     }),
     ClientsModule.register([
       {
-        name: 'KAKFA_SERVICE', // Register the Kafka client
+        name: 'KAKFA_SERVICE',
         transport: Transport.KAFKA,
         options: {
           client: {
-            brokers: ['kafka:9092'], // Replace with your Kafka broker(s)
+            brokers: [process.env.KAFKA_BROKER || 'localhost:9092'],
           },
         },
       },
