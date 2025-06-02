@@ -39,7 +39,7 @@ import { NotificationsModule } from './notifications/notifications.module';
         transport: Transport.KAFKA,
         options: {
           client: {
-            brokers: ['localhost:9092'], // Replace with your Kafka broker(s)
+            brokers: ['kafka:9092'], // Replace with your Kafka broker(s)
           },
         },
       },

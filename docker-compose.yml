@@ -9,6 +9,8 @@ services:
       - .env
     depends_on:
       - db
+      - kafka
+      - redis
     networks:
       - cocos-net
 
@@ -48,6 +50,8 @@ services:
     restart: unless-stopped
     ports:
       - "9092:9092"
+    depends_on: 
+      - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
