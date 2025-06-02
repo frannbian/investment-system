@@ -9,12 +9,12 @@ import {
   SizeType,
 } from './order.entity';
 import { CreateOrderDto } from './dtos/create-order.dto';
-import { InstrumentsService } from 'src/instruments/instruments.service';
-import { MarketDataService } from 'src/market-data/market-data.service';
-import { UsersService } from 'src/users/users.service';
-import { Instrument, InstrumentType } from 'src/instruments/instrument.entity';
-import { MarketData } from 'src/market-data/market-data.entity';
-import { User } from 'src/users/user.entity';
+import { InstrumentsService } from '../instruments/instruments.service';
+import { MarketDataService } from '../market-data/market-data.service';
+import { UsersService } from '../users/users.service';
+import { Instrument, InstrumentType } from '../instruments/instrument.entity';
+import { MarketData } from '../market-data/market-data.entity';
+import { User } from '../users/user.entity';
 
 
 describe('Testing order service flows', () => {

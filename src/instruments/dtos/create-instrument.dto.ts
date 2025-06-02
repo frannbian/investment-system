@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { Instrument, InstrumentType } from '../instrument.entity';
-import { IsUnique } from 'src/shared/decorators/is-unique.decorator';
+import { IsUnique } from '../../shared/decorators/is-unique.decorator';
 
 export class CreateInstrumentDto {
   @IsString()

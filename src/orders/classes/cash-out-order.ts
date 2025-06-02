@@ -1,7 +1,7 @@
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../../users/users.service';
 import { AbstractOrder } from './abstract-order';
 import { CreateOrderDto } from '../dtos/create-order.dto';
-import { InstrumentsService } from 'src/instruments/instruments.service';
+import { InstrumentsService } from '../../instruments/instruments.service';
 import { OrderStatus } from '../order.entity';
 
 export class CashOutOrder extends AbstractOrder {

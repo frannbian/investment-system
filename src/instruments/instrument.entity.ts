@@ -4,7 +4,7 @@ export enum InstrumentType {
   ACCIONES = 'ACCIONES',
   MONEDA = 'MONEDA',
 }
-
+export const InstrumentCurrencyId = 66;
 @Entity('instruments')
 export class Instrument {
   @PrimaryGeneratedColumn()

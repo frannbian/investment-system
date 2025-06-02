@@ -3,11 +3,11 @@ import { OrdersService } from './orders.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersController } from './orders.controller';
 import { Order } from './order.entity';
-import { Instrument } from 'src/instruments/instrument.entity';
-import { User } from 'src/users/user.entity';
-import { InstrumentsModule } from 'src/instruments/instruments.module';
-import { UsersModule } from 'src/users/users.module';
-import { MarketDataModule } from 'src/market-data/market-data.module';
+import { Instrument } from '../instruments/instrument.entity';
+import { User } from '../users/user.entity';
+import { InstrumentsModule } from '../instruments/instruments.module';
+import { UsersModule } from '../users/users.module';
+import { MarketDataModule } from '../market-data/market-data.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
@@ -22,7 +22,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         transport: Transport.KAFKA,
         options: {
           client: {
-            brokers: ['kafka:9092'],
+            brokers: [process.env.KAFKA_BROKER || 'localhost:9092'],
           },
         },
       },

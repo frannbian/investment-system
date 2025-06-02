@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { Instrument } from 'src/instruments/instrument.entity';
+import { Instrument } from '../../instruments/instrument.entity';
 
 export class MarketDataDto {
   @Expose()

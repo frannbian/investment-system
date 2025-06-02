@@ -60,4 +60,10 @@ export class Order {
 
   @Column()
   datetime: Date;
+
+  @Column({ default: false })
+  is_computed: boolean;
+
+  @Column({ nullable: true })
+  parent_order_id: number;
 }

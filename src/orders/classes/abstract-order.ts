@@ -1,10 +1,10 @@
-import { Instrument } from 'src/instruments/instrument.entity';
+import { Instrument } from '../../instruments/instrument.entity';
 import { CreateOrderDto } from '../dtos/create-order.dto';
-import { InstrumentsService } from 'src/instruments/instruments.service';
-import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/user.entity';
+import { InstrumentsService } from '../../instruments/instruments.service';
+import { UsersService } from '../../users/users.service';
+import { User } from '../../users/user.entity';
 import { Order, OrderStatus } from '../order.entity';
-import { MarketDataService } from 'src/market-data/market-data.service';
+import { MarketDataService } from '../../market-data/market-data.service';
 
 export abstract class AbstractOrder {
   constructor(

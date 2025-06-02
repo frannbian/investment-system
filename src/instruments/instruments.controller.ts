@@ -14,7 +14,7 @@ import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { CreateInstrumentDto } from './dtos/create-instrument.dto';
 import { InstrumentsService } from './instruments.service';
 import { UpdateInstrumentDto } from './dtos/update-instrument.dto';
-import { PaginationQueryDto } from 'src/shared/dtos/pagination-query.dto';
+import { PaginationQueryDto } from '../shared/dtos/pagination-query.dto';
 import { PaginatedInstrumentsDto } from './dtos/paginated-instruments.dto';
 import { InstrumentDto } from './dtos/instrument.dto';
 
@@ -33,7 +33,8 @@ export class InstrumentsController {
     const { page, limit } = paginationQuery;
     const cacheKey = `instruments:findAll:${page}:${limit}:${query}`;
 
-    const cachedResult = await this.cacheManager.get<PaginatedInstrumentsDto>(cacheKey);
+    const cachedResult =
+      await this.cacheManager.get<PaginatedInstrumentsDto>(cacheKey);
 
     if (cachedResult) {
       console.log('Cache hit for findAll');
@@ -61,20 +62,33 @@ export class InstrumentsController {
   }
 
   @Post()
-  create(@Body() createOrderDto: CreateInstrumentDto): Promise<InstrumentDto> {
-    return this.instrumentService.create(createOrderDto);
+  async create(
+    @Body() createOrderDto: CreateInstrumentDto,
+  ): Promise<InstrumentDto> {
+    const instrument = await this.instrumentService.create(createOrderDto);
+    await this.cacheManager.del(`instruments:findAll`);
+    return instrument;
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateInstrumentDto: UpdateInstrumentDto,
   ): Promise<InstrumentDto> {
-    return this.instrumentService.update(id, updateInstrumentDto);
+    const instrument = await this.instrumentService.update(
+      id,
+      updateInstrumentDto,
+    );
+    await this.cacheManager.del(`instruments:findOne:${id}`);
+    await this.cacheManager.del(`instruments:findAll`);
+    return instrument;
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number): Promise<InstrumentDto> {
-    return this.instrumentService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<InstrumentDto> {
+    const instrument = await this.instrumentService.remove(id);
+    await this.cacheManager.del(`instruments:findOne:${id}`);
+    await this.cacheManager.del(`instruments:findAll`);
+    return instrument;
   }
 }
