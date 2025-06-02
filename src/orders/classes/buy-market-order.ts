@@ -1,10 +1,10 @@
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../../users/users.service';
 import { AbstractOrder } from './abstract-order';
 import { CreateOrderDto } from '../dtos/create-order.dto';
-import { InstrumentsService } from 'src/instruments/instruments.service';
+import { InstrumentsService } from '../../instruments/instruments.service';
 import { Order, OrderStatus, SizeType } from '../order.entity';
-import { MarketDataService } from 'src/market-data/market-data.service';
-import { Instrument } from 'src/instruments/instrument.entity';
+import { MarketDataService } from '../../market-data/market-data.service';
+import { Instrument } from '../../instruments/instrument.entity';
 
 export class BuyMarketOrder extends AbstractOrder {
   constructor(

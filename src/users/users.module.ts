@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user.entity';
 import { UsersController } from './users.controller';
-import { SharedModule } from 'src/shared/shared.module';
+import { UsersService } from './users.service';
+import { User } from './user.entity';
+import { SharedModule } from '../shared/shared.module'; // Corrected import path
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), SharedModule],

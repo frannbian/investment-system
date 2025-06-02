@@ -1,15 +1,15 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-import { IsUnique } from 'src/shared/decorators/is-unique.decorator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsUnique } from '../../shared/decorators/is-unique.decorator';
 import { User } from '../user.entity';
 
 export class UpdateUserDto {
   @IsEmail()
-  @IsNotEmpty()
+  @IsOptional()
   @IsUnique(User, 'email', { message: 'Email already exists' })
-  email: string;
+  email?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   @IsUnique(User, 'accountNumber', { message: 'Account number already exists' })
-  accountNumber: string;
+  accountNumber?: string;
 }

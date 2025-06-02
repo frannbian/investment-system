@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { User } from './user.entity';
-import { OrderSide } from 'src/orders/order.entity';
+import { OrderSide } from '../orders/order.entity';
 import { PaginatedUsersDto } from './dtos/paginated-users.dto';
 import { UserDto } from './dtos/user.dto';
 import { plainToInstance } from 'class-transformer';

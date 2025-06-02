@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { MarketDataService } from './market-data.service';
-import { PaginationQueryDto } from 'src/shared/dtos/pagination-query.dto';
+import { PaginationQueryDto } from '../shared/dtos/pagination-query.dto';
 import { PaginatedMarketDataDto } from './dtos/paginated-market-data.dto';
 import { MarketDataDto } from './dtos/market-data.dto';
 

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { MarketData } from './market-data.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Instrument } from 'src/instruments/instrument.entity';
+import { Instrument } from '../instruments/instrument.entity';
 import { PaginatedMarketDataDto } from './dtos/paginated-market-data.dto';
 import { plainToInstance } from 'class-transformer';
 import { MarketDataDto } from './dtos/market-data.dto';

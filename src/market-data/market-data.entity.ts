@@ -1,4 +1,4 @@
-import { Instrument } from 'src/instruments/instrument.entity';
+import { Instrument } from '../instruments/instrument.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

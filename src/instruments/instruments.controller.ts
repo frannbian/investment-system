@@ -14,7 +14,7 @@ import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { CreateInstrumentDto } from './dtos/create-instrument.dto';
 import { InstrumentsService } from './instruments.service';
 import { UpdateInstrumentDto } from './dtos/update-instrument.dto';
-import { PaginationQueryDto } from 'src/shared/dtos/pagination-query.dto';
+import { PaginationQueryDto } from '../shared/dtos/pagination-query.dto';
 import { PaginatedInstrumentsDto } from './dtos/paginated-instruments.dto';
 import { InstrumentDto } from './dtos/instrument.dto';
 

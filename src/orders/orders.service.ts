@@ -3,16 +3,16 @@ import { CreateOrderDto } from './dtos/create-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order, OrderSide, OrderType, OrderStatus } from './order.entity';
-import { UsersService } from 'src/users/users.service';
-import { InstrumentsService } from 'src/instruments/instruments.service';
-import { MarketDataService } from 'src/market-data/market-data.service';
+import { UsersService } from '../users/users.service';
+import { InstrumentsService } from '../instruments/instruments.service';
+import { MarketDataService } from '../market-data/market-data.service';
 import { CashInOrder } from './classes/cash-in-order';
 import { CashOutOrder } from './classes/cash-out-order';
 import { AbstractOrder } from './classes/abstract-order';
 import { BuyMarketOrder } from './classes/buy-market-order';
 import { BuyLimitOrder } from './classes/buy-limit-order';
 import { SellOrder } from './classes/sell-order';
-import { InstrumentCurrencyId } from 'src/instruments/instrument.entity';
+import { InstrumentCurrencyId } from '../instruments/instrument.entity';
 
 @Injectable()
 export class OrdersService {
