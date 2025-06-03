@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: cocos-challange-cd-pipeline
+spec:
+  tasks:
+    - name: build-and-push-image
+      taskRef:
+        name: build-and-push
+      params:
+        - name: image
+          value: docker.io/your-dockerhub-username/cocos-challange:latest
+        - name: pathToDockerFile
+          value: Dockerfile
+        - name: pathToContext
+          value: .
+    - name: deploy-kubernetes
+      taskRef:
+        name: kubernetes-deploy
+      params:
+        - name: manifests
+          value: |
+            k8s/deployment.yaml
+            k8s/service.yaml
+            k8s/ingress.yaml
