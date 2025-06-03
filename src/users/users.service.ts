@@ -72,7 +72,14 @@ export class UsersService {
       .addSelect('i.type', 'type')
       .addSelect('md.close', 'currentPrice')
       .addSelect('o.instrument_id', 'instrumentId')
-      .addSelect('SUM(o.size)', 'totalSize')
+      .addSelect(
+        `SUM(CASE WHEN o.side = 'BUY' THEN o.size ELSE 0 END)`,
+        'totalBuySize',
+      )
+      .addSelect(
+        `SUM(CASE WHEN o.side = 'SELL' THEN o.size ELSE 0 END)`,
+        'totalSellSize',
+      )
       .addSelect('md.previous_close', 'previousClose')
       .from('orders', 'o')
       .innerJoin('instruments', 'i', 'o.instrument_id = i.id')
@@ -104,11 +111,13 @@ export class UsersService {
 
     const summary = orders.map((order) => {
       const totalValue =
-        parseFloat(order.totalSize) * parseFloat(order.currentPrice);
+        (parseFloat(order.totalBuySize) - parseFloat(order.totalSellSize)) *
+        parseFloat(order.currentPrice);
       totalAssetsValue += totalValue;
 
       const totalPrice =
-        parseFloat(order.totalSize) * parseFloat(order.previousClose);
+        (parseFloat(order.totalBuySize) - parseFloat(order.totalSellSize)) *
+        parseFloat(order.previousClose);
       const performance = ((totalValue - totalPrice) / totalPrice) * 100;
 
       return {
@@ -116,7 +125,10 @@ export class UsersService {
         name: order.name,
         ticker: order.ticker,
         type: order.type,
-        quantity: parseFloat(order.totalSize),
+        buyQuantity: parseFloat(order.totalBuySize),
+        sellQuantity: parseFloat(order.totalSellSize),
+        netQuantity:
+          parseFloat(order.totalBuySize) - parseFloat(order.totalSellSize),
         totalValue,
         performance,
       };
