@@ -2,9 +2,9 @@
   <img src="https://example.com/logo.svg" width="120" alt="Cocos Challenge Logo" />
 </p>
 
-# Cocos Challenge
+# Investment System
 
-Cocos Challenge is a project designed to provide a scalable and efficient solution for modern web development. It leverages cutting-edge technologies to deliver high performance and maintainability.
+Investment System is a project designed to provide a scalable and efficient solution for modern web development. It leverages cutting-edge technologies to deliver high performance and maintainability.
 
 ## Description
 
